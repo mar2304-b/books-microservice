@@ -1,0 +1,37 @@
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: booksdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/volumes:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: booksdb
+      MARIADB_USER: marianagb
+      MARIADB_PASSWORD: marianagb
+    networks:
+      - books-network
+  
+  web:
+    build:
+      context: ./books
+      dockerfile: Dockerfile
+    container_name: booksweb
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://booksdb:3306/booksdb
+      SPRING_DATASOURCE_USER: marianagb
+      SPRING_DATASOURCE_PASSWORD: marianagb
+    networks:
+      - books-network
+
+networks:
+  books-network:
+    driver: bridge
